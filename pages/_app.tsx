@@ -1,6 +1,7 @@
 // pages/_app.tsx
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
+import '../node_modules/leaflet/dist/leaflet.css';
 import { supabase } from "../src/lib/supabase";
 import Header from "../components/Header";
 import "../src/styles/globals.css"; // ← パスはこの形に（/src/styles/globals.css が存在する前提）

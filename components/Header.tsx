@@ -28,7 +28,7 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="inner">
-        <Link href="/" className="brand">Match to Match</Link>
+        <Link href="/" className="brand"> <img src="/icon.png" alt="Match to Match" width={40} height={40} /></Link>
 
         {/* 形を固定したままクラスだけ切り替える ⇒ Hydration差異が出ない */}
         <nav className="nav" suppressHydrationWarning>

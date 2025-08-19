@@ -30,19 +30,31 @@ export default function JoinTeam() {
 
   const join = async (teamId: string) => {
     setMsg(""); setErr("");
+
     if (myTeamId) return setErr("すでにチームに所属しています");
     const role = choice[teamId];
     if (!role) return setErr("参加するロールを選択してください");
 
-    const { error } = await supabase.rpc("claim_team_slot", { p_team_id: teamId, p_role: role });
-    if (error) {
-      if (error.message.includes("slot full")) setErr("そのロールは満員です");
-      else if (error.message.includes("already in a team")) setErr("すでに別チームに所属しています");
-      else setErr(error.message);
-      return;
-    }
-    setMsg("チームに参加しました！");
-    setMyTeamId(teamId);
+    // 1) 申請を作成
+    const { data: me } = await supabase.auth.getUser();
+    if (!me?.user) return setErr("ログインしてください");
+
+    const { data: req, error: reqErr } = await supabase
+      .from("team_join_requests")
+      .insert({ team_id: teamId, user_id: me.user.id, role })
+      .select()
+      .single();
+    if (reqErr) return setErr(reqErr.message);
+
+    // 2) チームチャットへ System 通知（管理者が見られる前提）
+    await supabase.from("chat_messages").insert({
+      team_id: teamId,
+      user_id: me.user.id,
+      message: `「${role}」で参加申請が届きました。管理画面から承認/却下してください。`,
+      system: true,
+    });
+
+    setMsg("参加申請を送信しました（承認待ち）");
   };
 
   return (
@@ -86,7 +98,7 @@ export default function JoinTeam() {
                   ))}
                 </select>
                 <button className="btn primary" onClick={()=>join(t.id)} disabled={!!myTeamId || open.length===0}>
-                  参加する
+                  参加申請
                 </button>
               </div>
               {myTeamId === t.id && <div className="help" style={{marginTop:6}}>※参加済み</div>}

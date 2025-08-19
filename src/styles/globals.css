@@ -56,7 +56,7 @@ ul{ padding-left: 1rem; }
 /* Buttons */
 button, .btn{
   display:inline-block; border:1px solid var(--line); background:#fff; color:#111;
-  padding:10px 14px; border-radius:12px; cursor:pointer; transition:.15s box-shadow, .15s transform;
+  padding:10px 14px; border-radius:12px; cursor:pointer; transition:.15s box-shadow, .15s transform;  white-space: nowrap;   
 }
 button:hover, .btn:hover{ box-shadow:0 2px 8px rgba(0,0,0,.06) }
 .btn.primary{ background:var(--accent); color:#fff; border:none }
@@ -64,18 +64,62 @@ button:hover, .btn:hover{ box-shadow:0 2px 8px rgba(0,0,0,.06) }
 .btn.danger{ background:var(--danger); color:#fff; border:none }
 .btn:disabled{ opacity:.6; cursor:not-allowed }
 
-/* Inputs */
-input[type=text], input[type=date], input[type=time], input[type=email], input[type=password], select, textarea{
-  width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:#fff;
+/* ===== Form controls – unified look ===== */
+:root{
+  /* 既存の変数はそのまま活用 */
+  --fc-bg: #ffffff;
+  --fc-border: var(--line);
+  --fc-border-hover: #d1d5db;  /* gray-300 */
+  --fc-ring: var(--accent);
+  --fc-text: var(--text);
+  --fc-muted: var(--muted);
+  --fc-radius: 12px;
+  --fc-height: 44px;
 }
+
+
+/* hover / focus */
+input:hover, select:hover, textarea:hover {
+  border-color: var(--fc-border-hover);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--fc-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc-ring) 22%, transparent);
+}
+
+/* placeholder / disabled / readonly */
+::placeholder { color: var(--fc-muted); opacity: .9; }
+input:disabled, select:disabled, textarea:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+input[readonly], textarea[readonly] {
+  background: #f9fafb;
+}
+
+/* エラー状態（どちらかを使って） */
+[aria-invalid="true"],
+.is-invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ef4444 18%, transparent);
+}
+
+/* テキストエリアは可変 */
+textarea { height: auto; min-height: 120px; resize: vertical; }
+
+/* 高さバリエーション（必要なら） */
+.input-sm { height: 36px; padding: 6px 10px; border-radius: 10px; }
+.input-lg { height: 52px; padding: 12px 16px; border-radius: 14px; }
+
+/* ラベル / 行の余白（既存と整合） */
 label{ display:block; font-size:14px; color:#374151; margin-bottom:6px; }
 .form-row{ display:grid; gap:10px; margin-bottom:14px; }
-.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
-@media (max-width: 720px){ .form-grid{ grid-template-columns:1fr } }
-.help{ color:var(--muted); font-size:12px }
+/* .form-grid, .help は既存のままでOK */
+
 
 /* Badges */
-.badge{ display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); background:#fff }
+.badge{ display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 8px;line-height: 1.4; border-radius:999px; border:1px solid var(--line); background:#fff }
 .badge.blue{ color: var(--accent); border-color:#bfdbfe; background:#eff6ff }
 .badge.green{ color: var(--success); border-color:#bbf7d0; background:#ecfdf5 }
 .badge.gray{ color:#374151; background:#f3f4f6; border-color:#e5e7eb }
@@ -101,3 +145,142 @@ label{ display:block; font-size:14px; color:#374151; margin-bottom:6px; }
 .msg.me{ margin-left:auto; background:var(--accent); color:#fff }
 .chatbox{ display:flex; gap:8px; padding:10px; border-top:1px solid var(--line); background:#fff; }
 .chatbox input{ flex:1 }
+
+
+body :is(
+  input:not([type]),
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="search"],
+  input[type="tel"],
+  select,
+  textarea
+){
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  display: block !important;
+  width: 100% !important;
+  height: var(--fc-height) !important;     /* 44px */
+  padding: 10px 14px !important;
+  border: 1.5px solid var(--fc-border) !important;
+  border-radius: var(--fc-radius) !important; /* 12px */
+  background: var(--fc-bg) !important;
+  color: var(--fc-text) !important;
+  font: inherit !important;
+  line-height: 1.4 !important;
+  outline: none !important;                /* ← 青い枠を抑止 */
+  box-shadow: none !important;
+  transition: border-color .15s, box-shadow .15s !important;
+}
+
+body :is(input, select, textarea):hover{
+  border-color: var(--fc-border-hover) !important;
+}
+
+body :is(input, select, textarea):focus,
+body :is(input, select, textarea):focus-visible{
+  outline: none !important;                /* ← 念押し */
+  border-color: var(--fc-ring) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc-ring) 22%, transparent) !important;
+}
+
+/* autofill（黄色背景を打ち消し） */
+input:-webkit-autofill{
+  -webkit-text-fill-color: var(--fc-text) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--fc-bg) inset !important;
+          box-shadow: 0 0 0 1000px var(--fc-bg) inset !important;
+}
+
+/* エラー表示を使いたい時 */
+:where([aria-invalid="true"], .is-invalid){
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ef4444 18%, transparent) !important;
+}
+/* ---- timeline ---- */
+.feed { display: grid; gap: 12px; }
+.post { padding: 14px; }
+.post-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.post-team { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 999px;
+  display: grid; place-items: center;
+  background: #eef2ff; color: #3730a3; font-weight: 700;
+}
+.post-title { font-weight: 600; }
+.post-sub { font-size: 12px; color: var(--muted); }
+
+.post-slots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.post-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.post-join { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* recruit card */
+.recruit { padding: 14px; }
+.recruit-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.recruit-team{ display:flex; align-items:center; gap:10px; }
+.recruit-title{ font-weight:600 }
+.recruit-sub{ font-size:12px; color:var(--muted) }
+.recruit-badges{ display:flex; gap:6px; flex-wrap:wrap; }
+.recruit-actions{ display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap }
+
+.role-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap:10px; margin-top:10px;
+}
+.role-card{
+  border:1px solid var(--line); border-radius:12px; padding:10px; background:#fff;
+  display:flex; flex-direction:column; gap:6px;
+}
+.role-card.open{ background:#fffbeb; border-color:#fde68a } /* 開いてる感 */
+.role-card.full{ background:#f3f4f6; border-color:#e5e7eb }
+.role-top{ display:flex; align-items:center; gap:8px; }
+.role-ic{ font-size:18px }
+.role-name{ font-weight:600 }
+.role-meta{ display:flex; justify-content:space-between; font-size:12px }
+.muted{ color:var(--muted) }
+/* ===== Recruit timeline ===== */
+.recruit { padding: 14px; }
+.recruit-head{
+  display: grid;
+  grid-template-columns: 1fr auto;      /* 右側を情報の塊に */
+  align-items: center;
+  gap: 12px;
+}
+.recruit-team{ display:flex; align-items:center; gap:10px; }
+.recruit-title{ font-size: 18px; font-weight: 700; }
+.recruit-badges{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+
+/* 日付・時間・場所を目立たせる */
+.recruit-when{ text-align: right; min-width: 220px; }
+.recruit-when .dt{ line-height: 1; }
+.recruit-when .date{ font-size: 18px; font-weight: 800; }
+.recruit-when .time{ font-size: 18px; font-weight: 800; margin-left: 8px; }
+.recruit-when .loc{ font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+/* 参加カードをコンパクトに */
+.role-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.role-card{
+  background:#fff; border:1px solid var(--line); border-radius: 12px; padding: 8px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.role-card.open{ box-shadow: 0 1px 0 rgba(37,99,235,.05); }
+.role-top{ display:flex; align-items:center; gap:6px; }
+.role-ic{ font-size: 14px; }
+.role-name{ font-size: 12px; font-weight: 600; }
+.role-meta{ display:flex; justify-content:space-between; align-items:center; font-size: 11px; color: var(--muted); }
+
+/* 小さめボタン */
+.btn.xs{
+  padding: 4px 8px; font-size: 12px; border-radius: 10px;
+}
