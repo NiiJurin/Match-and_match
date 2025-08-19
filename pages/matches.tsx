@@ -44,37 +44,40 @@ export default function MatchList() {
     load();
   }, []);
 
-  const applyToMatch = async (matchId: string) => {
+  const applyToMatch = async (matchId: string, hostTeamId: string) => {
+    setError('');
     if (!myTeamId) {
       setError('チームに所属していません');
       return;
     }
+    if (hostTeamId === myTeamId) {
+      setError('自分の主催試合には応募できません');
+      return;
+    }
 
-    const { error } = await supabase
-      .from('applications')
-      .insert({
-        match_id: matchId,
-        team_id: myTeamId,
-        status: '申請中',
-      });
+    const { error } = await supabase.from('applications').insert({
+      match_id: matchId,
+      team_id: myTeamId,
+      status: '申請中',
+    });
 
     if (error) setError(error.message);
     else alert('応募しました！');
   };
-
   return (
     <div style={{ padding: 32 }}>
       <h2>募集中の試合一覧</h2>
-        {matches.map((match) => (
-          <MatchCard
-            key={match.id}
-            title={`主催: ${match.teams?.name}`}
-            tags={[`希望レベル: ${match.level_preference}`]}
-            date={`${match.date} ${match.time}`}
-            location={match.location}
-            positions={{ 応募: { current: 0, max: 1 } }}
-          />
-        ))}
+      {matches.map((match) => (
+        <MatchCard
+          key={match.id}
+          title={`主催: ${match.teams?.name}`}
+          tags={[`希望レベル: ${match.level_preference || '指定なし'}`]}
+          date={`${match.date} ${match.time}`}
+          location={match.location}
+          onApply={() => applyToMatch(match.id, match.team_id)}  // ← host比較のため team_id も渡す
+          positions={{ 応募: { current: 0, max: 1 } }}
+        />
+      ))}
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );

@@ -60,8 +60,8 @@ useEffect(() => {
     // チャットメッセージを取得
     const { data, error } = await supabase
       .from('chat_messages')
-      .select(`*, users(username)`)
-      .eq('match_id', matchId)
+      .select(`*, users(name)`)
+      .eq('match_id', matchId)  
       .order('created_at', { ascending: true });
 
     if (!error && data) {
@@ -98,7 +98,7 @@ useEffect(() => {
       <div style={{ maxHeight: 400, overflowY: 'scroll', border: '1px solid #ccc', padding: 8 }}>
         {messages.map(msg => (
           <div key={msg.id}>
-            <strong>{msg.users?.username || msg.user_id}</strong>: {msg.message}
+            <strong>{msg.users?.name || msg.user_id}</strong>: {msg.message}
           </div>
         ))}
       </div>

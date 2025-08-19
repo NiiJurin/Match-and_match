@@ -1,33 +1,39 @@
 // pages/_app.tsx
-import { useEffect } from 'react';
-import type { AppProps } from 'next/app';
-import { supabase } from '../src/lib/supabase';
+import type { AppProps } from "next/app";
+import { useEffect } from "react";
+import { supabase } from "../src/lib/supabase";
+import Header from "../components/Header";
+import "../src/styles/globals.css"; // ← パスはこの形に（/src/styles/globals.css が存在する前提）
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
-    const ensureUserRecord = async () => {
+    // ログイン済なら users 行を作成（なければ）
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: existing, error } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', user.id)
+      const { data, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", user.id)
         .single();
 
-      if (!existing && !error) {
-        await supabase.from('users').insert({
+      if (!data && !error) {
+        await supabase.from("users").insert({
           id: user.id,
-          name: user.email ?? 'no name',
+          name: user.email ?? "no name",
           team_id: null,
         });
       }
-    };
-
-    ensureUserRecord();
+    })();
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Header />
+        <main className="container">
+          <Component {...pageProps} />
+        </main>
+    </>
+  );
 }
-
-export default MyApp;
